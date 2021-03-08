@@ -1,6 +1,11 @@
 ### Tree Observatory Project General Graphing Script ###
 ## American sycamore (Platanus occidentalis) Analysis at The Morton Arboretum ##
+# This script is mainly a starting place template for an analysis of tree
+  # observatory and forestry plot data. Use it for data exploration.
+  # Inputs: Data (from Readin, then Sync).
+  # Outputs: One very bulky graph.
 
+# Graphs all of the tree observatory and forestry plot data.
 print(ggplot(Data, aes(x=Datetime))+ 
   geom_line(aes(y=Corrected_Out, colour="Corr_Out_TO"))+
   geom_line(aes(y=Corrected_In, colour="Corr_In_TO"))+
