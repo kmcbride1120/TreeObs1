@@ -5,11 +5,11 @@
   # Known winter error codes, such as -22.220 and 500, were manually removed.
   # The data was zeroed using the average values from Nov 27-Dec 1, 2019
     # where sap flow should theoretically be 0.
+      # This TO file should be considered as an alternate to the updated
+        # TO data from Cleaning and Drift_Sync
   # A small amount of date drift was incurred due to the lack of a hub. The data
     # was manually delayed by one window every 58, then 59 days in order to
     # allow for accurate comparison to the forestry plot data.
-  # This TO read-in will be extraneous as soon as the drift_sync on
-    # the cleaning script works.
   # Contact Newton Tran for information about forestry plot data cleaning.
 
 

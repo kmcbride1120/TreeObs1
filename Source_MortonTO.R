@@ -14,7 +14,7 @@ library(lubridate)
 source('D:/Zelda/College/Research/Sap Flow/GitHub/Cleaning_MortonTO.R')
 source('D:/Zelda/College/Research/Sap Flow/GitHub/Drift_Sync_MortonTO.R')
 
-# Reads in Tree Observatory, forestry plot, and environmental data
+# Reads in forestry plot, environmental data (and alternate TO data)
 source('D:/Zelda/College/Research/Sap Flow/GitHub/Readin_MortonTO.R')
 
 # Synchronizes forestry plot, Tree Observatory, and environmental data into Data
