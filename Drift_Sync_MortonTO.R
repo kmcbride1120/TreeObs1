@@ -243,5 +243,5 @@ SFTO <- select(SF10, Date, Time, Datetime, Unc_Out1, Unc_In1,
                Cor_Out1, Cor_In1, Sap_Flow_Out1, Sap_Flow_In1)
 #View(SFTO)
 
-# Cleanup line: clears workspace except for SF7 - proceed to Drift_Sync
+# Cleanup line: clears workspace except for SFTO
 rm(list = setdiff(ls(), "SFTO"))
