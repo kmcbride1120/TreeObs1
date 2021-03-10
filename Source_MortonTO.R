@@ -10,11 +10,12 @@ rm(list = ls())
 library(tidyverse)
 library(lubridate)
 
+# Cleans, zeroes, and drift synchronizes Tree Observatory data
+source('D:/Zelda/College/Research/Sap Flow/GitHub/Cleaning_MortonTO.R')
+source('D:/Zelda/College/Research/Sap Flow/GitHub/Drift_Sync_MortonTO.R')
+
 # Reads in Tree Observatory, forestry plot, and environmental data
 source('D:/Zelda/College/Research/Sap Flow/GitHub/Readin_MortonTO.R')
-
-# Cleans and zeroes Tree Observatory data
-#<In progress (readin currently imports manually cleaned TO data)>
 
 # Synchronizes forestry plot, Tree Observatory, and environmental data into Data
 source('D:/Zelda/College/Research/Sap Flow/GitHub/Sync_MortonTO.R')
