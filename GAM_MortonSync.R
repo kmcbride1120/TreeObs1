@@ -45,15 +45,28 @@ SFc19 <- SFTOH2c[SFTOH2c$Yr_Num=="2019",]
 SFc20 <- SFTOH2c[SFTOH2c$Yr_Num=="2020",]
 SFc21 <- SFTOH2c[SFTOH2c$Yr_Num=="2021",]
 
-# Fit model with gamm() plus first order autoregressive process CAR(1)
-#model1 <- gamm(Unc_Out1 ~ s(DT_Num, bs = "cc", k = 12), correlation = corCAR1(form = ~ DT_Num), method = "REML", data = SFc19)
-plot(model1$gam)
-  # Correlation types??
+# Fit model with gamm() plus autocorrelation process
+model1 <- gam(Unc_Out1 ~ s(DT_Num, k = 150), data = SFTOH2a, method = "REML")
+#model2 <- gamm(Unc_Out1 ~ s(DT_Num, bs = "cc", k = 12), correlation = corCAR1(), method = "REML", data = SFc19m)
+#plot(model2$gam)
+  # Data may be too big for gamm() -> grouping by day?
+  # Memory limitation issues
+    # Data is autocorrelated, but can we make a gam() work just for predictions?
 
-## Outline
-# Check if k is large enough using gam.check()
-# Check diagnostics using gam.check()
+# Visualize model
+plot(model1, shade = TRUE)
+
+# Check diagnositics and size of k using gam.check()
+gam.check(model1)
+
 # Check if trend is significant using summary()
+summary(model1)
+
 # Point-wise or simultaneous intervals using confint()
+#confint(model1)
+
 # Periods of change using fderiv()
-# Results!
+#fderiv(model1)
+
+# Predictions
+#predict(model1)
