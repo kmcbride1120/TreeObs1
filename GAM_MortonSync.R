@@ -38,35 +38,32 @@ SFTOH2a <- transform(SFTOH2, DT_Num = DT_Num*10000 +
 SFTOH2b <- transform(SFTOH2a, Yr_Num = lubridate::year(Datetime))
 SFTOH2c <- transform(SFTOH2b, Mon_Num = lubridate::month(Datetime))
 
+# Generates day of year column
+SFTOH2d <- transform(SFTOH2c, DOY = lubridate::yday(Datetime))
+
 # Subsets data by year (gamm() limits the size of the dataset)
   # Expand this as more years of data are added or write a function
-SFc18 <- SFTOH2c[SFTOH2c$Yr_Num=="2018",]
-SFc19 <- SFTOH2c[SFTOH2c$Yr_Num=="2019",]
-SFc20 <- SFTOH2c[SFTOH2c$Yr_Num=="2020",]
-SFc21 <- SFTOH2c[SFTOH2c$Yr_Num=="2021",]
+SFd18 <- SFTOH2d[SFTOH2d$Yr_Num=="2018",]
+SFd19 <- SFTOH2d[SFTOH2d$Yr_Num=="2019",]
+SFd20 <- SFTOH2d[SFTOH2d$Yr_Num=="2020",]
+SFd21 <- SFTOH2d[SFTOH2d$Yr_Num=="2021",]
 
-# Fit model with gamm() plus autocorrelation process
-model1 <- gam(Unc_Out1 ~ s(DT_Num, k = 150), data = SFTOH2a, method = "REML")
-#model2 <- gamm(Unc_Out1 ~ s(DT_Num, bs = "cc", k = 12), correlation = corCAR1(), method = "REML", data = SFc19m)
-#plot(model2$gam)
-  # Data may be too big for gamm() -> grouping by day?
-  # Memory limitation issues
-    # Data is autocorrelated, but can we make a gam() work just for predictions?
+# Fit model with gamm() plus autocorrelation process, grouped by DOY
+model2 <- gamm(Unc_Out1 ~ s(DT_Num, bs = "cc", k = 350), correlation = corCAR1(form = ~ 1 | DOY), method = "REML", data = SFd19)
+plot(model2$gam, shade = TRUE)
 
 # Visualize model
 plot(model1, shade = TRUE)
 
 # Check diagnositics and size of k using gam.check()
-gam.check(model1)
+gam.check(model2$gam)
 
 # Check if trend is significant using summary()
-summary(model1)
+summary(model2$gam)
 
 # Point-wise or simultaneous intervals using confint()
-#confint(model1)
-
-# Periods of change using fderiv()
-#fderiv(model1)
+confint(model2$gam)
 
 # Predictions
-#predict(model1)
+M2Pr <- predict(model2$gam)
+plot(M2Pr)
