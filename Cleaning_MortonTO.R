@@ -6,6 +6,8 @@
     # This script reads in data, cleans out fragments and outliers, zeroes the
       # data, and outputs data for drift correction.
   # Proceed to Drift_Sync_MortonTO after running this script
+  # Note: Outlier cleaning is not a long-term solution and currently requires 
+    # updating every season.
 
 # Clean slate
 rm(list = ls())
@@ -17,8 +19,10 @@ library(hms)
 
 ## Read-in ##
 # Reads in TO data (modify, assumes downloaded from Google Drive -> .csv)
-SF_Raw <- read_csv("D:/Zelda/College/Research/Sap Flow/GitHub/RawSF_MortonTO.CSV", 
-    skip = 17)
+library(readr)
+SF_Raw <- read_csv("D:/Zelda/College/Research/Sap Flow/Spreadsheets/SF_Raw_16Apr.CSV", skip = 17)
+#SF_Raw <- read_csv("D:/Zelda/College/Research/Sap Flow/GitHub/RawSF_MortonTO.CSV", 
+                  # skip = 17)
 #View(SF_Raw)
 
 # Creates a data frame for the raw data and renames relevant columns
@@ -91,14 +95,31 @@ W22019 <- W12019[W12019$Cor_In > -5.060 & W12019$Cor_Out < -0.985,]
 W32019 <- W22019[W22019$Unc_Out > -2.803 & W22019$Cor_Out < 0.042,]
 W42019 <- W32019[W32019$Unc_In > -3.929 & W32019$Cor_Out < -1.570,]
 
+# Removes 2020 winter outliers
+SF52020 <- SF5[SF5$Date > "2020-11-30" & SF5$Date < "2021-04-01",]
+#boxplot.stats(SF52020$Cor_Out, coef = 1.5, do.conf = TRUE, do.out = FALSE)
+# Lower whisker: -6.2800 and upper whisker: 2.1500
+#boxplot.stats(SF52020$Cor_In, coef = 1.5, do.conf = TRUE, do.out = FALSE)
+# Lower whisker: -8.8470 and upper whisker: 1.9450
+#boxplot.stats(SF52020$Unc_Out, coef = 1.5, do.conf = TRUE, do.out = FALSE)
+# Lower whisker: -4.633 and upper whisker: 0.244
+#boxplot.stats(SF52020$Unc_In, coef = 1.5, do.conf = TRUE, do.out = FALSE)
+# Lower whisker: -6.121 and upper whisker: 0.125
+W12020 <- SF52020[SF52020$Cor_Out > -6.2800 & SF52020$Cor_Out < 2.1500,]
+W22020 <- W12020[W12020$Cor_In > -8.8470 & W12020$Cor_Out < 1.9450,]
+W32020 <- W22020[W22020$Unc_Out > -4.633 & W22020$Cor_Out < 0.244,]
+W42020 <- W32020[W32020$Unc_In > --6.121 & W32020$Cor_Out < 0.125,]
+
 # Combines dataframes into one document again
-  # You will need to repeat this process at the end of the 2020-2021 winter
+  # You will need to repeat this process at the end of each season
   # Note: winter is from December 1st - March 31st for outlier correction
     # Don't want to interfere with an early budburst or late decline
+      # Use the Cleaning_Harmonic script for a more ruthless outlier removal
 GS2018 <- SF5[SF5$Date < "2018-12-01",]
 GS2019 <- SF5[SF5$Date > "2019-03-31" & SF5$Date < "2019-12-01",]
-GS2020 <- SF5[SF5$Date > "2020-03-31",]
-SF6 <- rbind(GS2018, W42018, GS2019, W42019, GS2020)
+GS2020 <- SF5[SF5$Date > "2020-03-31" & SF5$Date < "2020-12-01",]
+GS2021 <- SF5[SF5$Date > "2021-03-31",]
+SF6 <- rbind(GS2018, W42018, GS2019, W42019, GS2020, W42020, GS2021)
 
 ## Zeroing ##
 #SFZero <- SF6[SF6$Date > "2019-03-31" & SF6$Date < "2019-05-01",]
