@@ -49,14 +49,42 @@ ggplot(SFTO2, aes(x = Datetime))+
 
 ## Sliding Window ##
 # Generates variables
-SFTO1aSW <- as.data.frame(SFTO1a)
-UC <- SFTO1aSW$Unc_Out
-Dt <- SFTO1aSW$Date
+SFTOSW <- as.data.frame(SFTOH)
+SFTOSW <- na.omit(SFTOSW)
+SFTOSW1 <- SFTOSW[SFTOSW$Datetime>"2018-07-01"&SFTOSW$Datetime<"2018-08-01",]
+UC <- SFTOSW1$Unc_Out
+Dt <- SFTOSW1$Date
 
-# Creates a harmonic regression within a sliding window (???)
-Har <- function(x){as.numeric(as.character(harmonic.regression(as.numeric(UC), 1:length(Dt)), Tau = 144))}
-SFHSW <- runner(x=UC, k="1 days", lag = 1, idx=Dt, f = Har)
+# Creates a harmonic regression within a sliding window
+  # Doesn't generate the output I'm looking for
+Har <- function(x){as.numeric(as.character(harmonic.regression(UC, 1:length(Dt), Tau = 144)))}
+SFHSWR <- runner(x=UC, k="7 days", lag = 1, idx=Dt, f = Har)
 
 # Visualizes output
-View(SFHSW)
-plot(SFHSW)
+View(SFHSWR)
+plot(SFHSWR)
+
+# Could I embed runner inside harmonic.regression to get the output I want?
+# Generates variables
+UniDt <- unique(as.Date(SFTOSW1$Date))
+UniCt <- days(1)
+Strt <- as.Date("2018-07-01", origin="1970-01-01")
+
+# Iterative function (sliding window)
+Runlen <- seq.Date(Strt + 3*UniCt, as.Date("2018-08-01", origin="1970-01-01"), 1)
+
+# Runs harmonic regression
+RegList <- lapply(Runlen, function(x){
+  harmonic.regression(UC, 1:length(SFTOSW1$Date), Tau = 144)})
+
+# Generates data frame
+RegDF <- as.data.frame(RegList)
+
+# Visualizes output
+  # Fit.vals 0-15 for one month - knit together?
+  # Compare to actual harmonic data? 
+View(RegDF)
+plot(RegDF$fit.vals)
+
+# Try GAM instead?
+# Auto arima?
