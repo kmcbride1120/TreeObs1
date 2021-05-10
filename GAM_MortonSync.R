@@ -1,6 +1,6 @@
 ### Generalized Additive Model (Daily) Code ###
 ## American sycamore (Platanus occidentalis) Tweets at The Morton Arboretum ##
-# This script will create a generalized additive model (on a daily scale?) 
+# This script will create a generalized additive model on a seasonal scale
   # for the TO data. A standard harmonic curve did not provide a good estimation
   # of the data, but may still be necessary in order to estimate the start, end,
   # and peak of the growing season. This model will provide closer estimations of
@@ -70,7 +70,7 @@ SFd21 <- SFTOH2e[SFTOH2e$Yr_Num=="2021",]
 #model18 <- gamm(Unc_Out1 ~ s(DT_Num, bs = "cc", k = 12), correlation = corCAR1(form = ~ 1 | DOY), method = "REML", data = SFd18)
 #plot(model18$gam, shade = TRUE)
 # Same model with daily sums
-#model18a <- gamm(Unc_Out_Sum ~ s(DOY, bs = "cc", k = 12), correlation = corCAR1(form = ~ 1 | DOY), method = "REML", data = SFd18)
+model18a <- gamm(Unc_Out_Sum ~ s(DOY, bs = "cc", k = 12), correlation = corCAR1(form = ~ 1 | DOY), method = "REML", data = SFd18)
 #plot(model18a$gam, shade = TRUE)
 
 # Model with all years of data, no environmental information
@@ -101,18 +101,12 @@ Met2019c$SRR <- as.numeric(Met2019c$SRR)
 
 # Merges weather data with sap flow data from basic GAM (earlier in document)
 SFW <- merge(SFTOH2e, Met2019c, all.x = TRUE, all.y = FALSE)
-
-# Subsets data by year
-# Expand this as more years of data are added or write a function
-SFW18 <- SFW[SFW$Yr_Num=="2018",]
-SFW19 <- SFW[SFW$Yr_Num=="2019",]
-SFW20 <- SFW[SFW$Yr_Num=="2020",]
-SFW21 <- SFW[SFW$Yr_Num=="2021",]
+SFW <- na.omit(SFW)
 
 # Environmental data GAMs
 # Generates GAM with VPD, SR, and Temp rolling averages
 modelea <- gamm(Unc_Out1 ~ (DOY*VPDR*SRR*TempR), correlation = corCAR1(form = ~ 1 | DOY), random=list(DOY=~1), method = "REML", data = SFW)
-plot(modelea$gam, shade = TRUE, all.terms = TRUE)
+#plot(modelea$gam, shade = TRUE, all.terms = TRUE)
 # Assesses GAM
   # Good model? Check residuals for homoskedacity using resid()
     # Residuals normally distributed? Predicted vs. observed linear?
@@ -122,11 +116,12 @@ MEAR <- residuals.gam(modelea$gam)
 plot(MEAR)
 gam.check(modelea$gam, k.rep=100)
 # Looks at ANOVA outputs
+  # Higher R^2 value than the 2-variable model
 anova.gam(modelea$gam)
 
 # Generates GAM with only Temp and SR rolling averages
 modeleb <- gamm(Unc_Out1 ~ (DOY*SRR*TempR), correlation = corCAR1(form = ~ 1 | DOY), random=list(DOY=~1), method = "REML", data = SFW)
-plot(modeleb$gam, shade = TRUE, all.terms = TRUE)
+#plot(modeleb$gam, shade = TRUE, all.terms = TRUE)
 # Assesses GAM
 summary(modeleb$gam)
 MEBR <- residuals.gam(modeleb$gam)
@@ -138,11 +133,58 @@ gam.check(modeleb$gam, k.rep=100)
 anova.gam(modeleb$gam)
 
 ## Predictions
-  # Use IQR to get confidence interval, then compare to live data
 # 3-variable model
-MEAP <- predict(modelea$gam)
-plot(MEAP)
+  # *100 is based on the scale of ME18aP
+MEAP <- predict(modelea$gam, type="response", newdata=SFW, se.fit = TRUE)
+Fitea <- as.data.frame(MEAP$fit*100)
+
+# Forms point-wise confidence intervals
+Uea <- MEAP$fit*100 + (2 * MEAP$se.fit*100)
+Lea <- MEAP$fit*100 - (2 * MEAP$se.fit*100)
+
+# Plots data
+ggplot(SFW, aes(x=SFW$Datetime))+
+  geom_line(data=Fitea, y=MEAP$fit*100, colour = "red")+
+  geom_ribbon(aes(ymin = Lea, ymax = Uea), alpha = 0.2, fill = "red")+
+  geom_point(aes(y=SFW$Unc_Out_Sum))+
+  scale_x_datetime(xlab("Date"), 
+                   date_breaks = "6 months",
+                   date_minor_breaks = "1 month")+
+  scale_y_continuous(ylab("Uncorrected Sap Flow Daily Sum"))
 
 # 2-variable model
-MEBP <- predict(modeleb$gam)
-plot(MEBP)
+MEBP <- predict(modeleb$gam, newdata=SFW, type="response", se.fit = TRUE)
+Fiteb <- as.data.frame(MEBP$fit*100)
+
+# Forms point-wise confidence intervals
+Ueb <- MEBP$fit*100 + (2 * MEBP$se.fit*100)
+Leb <- MEBP$fit*100 - (2 * MEBP$se.fit*100)
+
+# Plots data
+ggplot(SFW, aes(x=SFW$Datetime))+
+  geom_line(data=Fiteb, y=MEBP$fit*100, colour = "blue")+
+  geom_ribbon(aes(ymin = Leb, ymax = Ueb), alpha = 0.2, fill = "blue")+
+  geom_point(aes(y=SFW$Unc_Out_Sum))+
+  scale_x_datetime(xlab("Date"), 
+                   date_breaks = "6 months",
+                   date_minor_breaks = "1 month")+
+  scale_y_continuous(ylab("Uncorrected Sap Flow Daily Sum"))
+
+
+# Sap flow 2018 only model
+ME18aP <- predict(model18a$gam, type="response", newdata=SFW, se.fit = TRUE)
+Fit18a <- as.data.frame(ME18aP$fit)
+
+# Forms point-wise confidence intervals (can also try simultaneous)
+U18a <- ME18aP$fit + (2 * ME18aP$se.fit)
+L18a <- ME18aP$fit - (2 * ME18aP$se.fit)
+
+# Plots data
+ggplot(SFW, aes(x=SFW$Datetime))+
+  geom_line(data=Fit18a, y=ME18aP$fit, colour = "chartreuse4")+
+  geom_ribbon(aes(ymin = L18a, ymax = U18a), alpha = 0.2, fill = "chartreuse4")+
+  geom_point(aes(y=SFW$Unc_Out_Sum))+
+  scale_x_datetime(xlab("Date"), 
+    date_breaks = "6 months",
+    date_minor_breaks = "1 month")+
+  scale_y_continuous(ylab("Uncorrected Sap Flow Daily Sum"))
