@@ -7,7 +7,7 @@
       # data, and outputs data for drift correction.
   # Proceed to Drift_Sync_MortonTO after running this script
   # Note: Outlier cleaning is not a long-term solution and currently requires 
-    # updating every season.
+    # updating every season. Thanks to Newton Tran for helping me get this far!
 
 # Clean slate
 rm(list = ls())

@@ -71,7 +71,8 @@ UniCt <- days(1)
 Strt <- as.Date("2018-07-01", origin="1970-01-01")
 
 # Iterative function (sliding window)
-Runlen <- seq.Date(Strt + 3*UniCt, as.Date("2018-08-01", origin="1970-01-01"), 1)
+  # What window size to choose?
+Runlen <- seq.Date(Strt + 3*UniCt, as.Date("2018-08-01", origin="1970-01-01"), 3)
 
 # Runs harmonic regression
 RegList <- lapply(Runlen, function(x){
@@ -81,10 +82,11 @@ RegList <- lapply(Runlen, function(x){
 RegDF <- as.data.frame(RegList)
 
 # Visualizes output
-  # Fit.vals 0-15 for one month - knit together?
+  # Fit.vals 0-X - knit together?
   # Compare to actual harmonic data? 
 View(RegDF)
 plot(RegDF$fit.vals)
 
 # Try GAM instead?
-# Auto arima?
+# Auto arima forecasting?
+# Try the runner(harmonic) setup again but literally just use asin(bx + c)?

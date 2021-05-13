@@ -1,4 +1,4 @@
-### Generalized Additive Model (Daily) Code ###
+### Generalized Additive Model Code ###
 ## American sycamore (Platanus occidentalis) Tweets at The Morton Arboretum ##
 # This script will create a generalized additive model on a seasonal scale
   # for the TO data. A standard harmonic curve did not provide a good estimation
@@ -114,7 +114,7 @@ modelea <- gamm(Unc_Out1 ~ (DOY*VPDR*SRR*TempR), correlation = corCAR1(form = ~ 
 summary(modelea$gam)
 MEAR <- residuals.gam(modelea$gam)
 plot(MEAR)
-gam.check(modelea$gam, k.rep=100)
+gam.check(modelea$gam, k.rep=12)
 # Looks at ANOVA outputs
   # Higher R^2 value than the 2-variable model
 anova.gam(modelea$gam)
@@ -126,7 +126,7 @@ modeleb <- gamm(Unc_Out1 ~ (DOY*SRR*TempR), correlation = corCAR1(form = ~ 1 | D
 summary(modeleb$gam)
 MEBR <- residuals.gam(modeleb$gam)
 plot(MEBR)
-gam.check(modeleb$gam, k.rep=100)
+gam.check(modeleb$gam, k.rep=12)
 # Looks at ANOVA outputs
   # Perform variable reduction to get a good model
     # Sig with all three: TempR, DOY:TempR, TempR:SRR, DOY:TempR:SRR
@@ -169,7 +169,6 @@ ggplot(SFW, aes(x=SFW$Datetime))+
                    date_breaks = "6 months",
                    date_minor_breaks = "1 month")+
   scale_y_continuous(ylab("Uncorrected Sap Flow Daily Sum"))
-
 
 # Sap flow 2018 only model
 ME18aP <- predict(model18a$gam, type="response", newdata=SFW, se.fit = TRUE)

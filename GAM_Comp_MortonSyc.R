@@ -137,7 +137,7 @@ SFWComp2 <- merge(SFWComp2d, SFWComp1f)
 
 # Model 1 (VPD, SR, Temp): compares daily sap flow sums to confidence interval
 AComp <- as.data.frame(ifelse(SFWComp2$Unc_Out_Sum<SFWComp2$Ueamean&SFWComp2$Unc_Out_Sum>SFWComp2$Leamean, print("Within predictions."), print("Potentially unusual day.")))
-names(AComp)[1] <- "Prediction"
+names(AComp)[1] <- "PredictionA"
 
 # Generates data.frame with comparison output
 ASFComp <- cbind(SFWComp2a, AComp)
@@ -145,8 +145,16 @@ View(ASFComp)
 
 # Model 2 (SR, Temp): Compares daily sap flow sums to confidence interval
 BComp <- as.data.frame(ifelse(SFWComp2$Unc_Out_Sum<SFWComp2$Uebmean&SFWComp2$Unc_Out_Sum>SFWComp2$Lebmean, print("Within predictions."), print("Potentially unusual day.")))
-names(BComp)[1] <- "Prediction"
+names(BComp)[1] <- "PredictionB"
 
 # Generates data.frame with comparison output
 BSFComp <- cbind(SFWComp2a, BComp)
 View(BSFComp)
+
+# Compares models 1 and 2 - only looks at days with differences in predictions
+SFComp <- merge(ASFComp, BSFComp)
+CComp <- as.data.frame(ifelse(SFComp$PredictionA!=SFComp$PredictionB, print(1), print(0)))
+names(CComp)[1] <- "Differences"
+CSFComp <- cbind(SFWComp2a, AComp, BComp, CComp)
+CSFComp <- CSFComp[CSFComp$Differences==1,]
+View(CSFComp)
