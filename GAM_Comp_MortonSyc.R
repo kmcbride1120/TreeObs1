@@ -113,7 +113,7 @@ SFWComp1a <- unique(as.Date(SFWCompd$Date))
 SFWComp1b <- unique(SFWComp$Unc_Out_Sum)
 
 # Generates an average upper and lower bound for each day
-SFWComp1c <- SFWComp1d %>%
+SFWComp1c <- SFWCompd %>%
   group_by(Date) %>%
   summarize(Ueamean = mean(Uea))
 SFWComp1d <- SFWCompd %>%
